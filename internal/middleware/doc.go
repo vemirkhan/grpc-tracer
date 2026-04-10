@@ -19,4 +19,13 @@
 //	)
 //
 //	grpc.NewServer(grpc.UnaryInterceptor(chain))
+//
+// # Execution Order
+//
+// Given interceptors A, B, and C passed to Chain in that order, the call
+// sequence for an incoming RPC is:
+//
+//	A (pre) → B (pre) → C (pre) → handler → C (post) → B (post) → A (post)
+//
+// This mirrors the behaviour of standard middleware stacks in HTTP frameworks.
 package middleware

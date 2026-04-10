@@ -90,3 +90,38 @@ func (v *Visualizer) FormatAllTraces() string {
 
 	return builder.String()
 }
+
+// FormatTraceSince returns a formatted summary of all traces started after the given time
+func (v *Visualizer) FormatTraceSince(since time.Time) string {
+	traces := v.store.GetAllTraces()
+
+	var builder strings.Builder
+	builder.WriteString(fmt.Sprintf("\n=== Traces since %s ===\n", since.Format(time.RFC3339)))
+
+	count := 0
+	for traceID, spans := range traces {
+		if len(spans) == 0 {
+			continue
+		}
+		// Use the earliest span start time as the trace start time
+		traceStart := spans[0].StartTime
+		for _, span := range spans {
+			if span.StartTime.Before(traceStart) {
+				traceStart = span.StartTime
+			}
+		}
+		if traceStart.Before(since) {
+			continue
+		}
+		builder.WriteString(fmt.Sprintf("- %s: %d spans, started: %s\n", traceID[:16], len(spans), traceStart.Format(time.RFC3339)))
+		count++
+	}
+
+	if count == 0 {
+		builder.WriteString("No traces found.\n")
+	} else {
+		builder.WriteString(fmt.Sprintf("\nTotal: %d trace(s)\n", count))
+	}
+
+	return builder.String()
+}

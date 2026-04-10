@@ -81,6 +81,28 @@ func (a *AdaptiveSampler) ErrorRate() float64 {
 	return a.errorRate(time.Now())
 }
 
+// Stats returns a snapshot of the current sampler state, including the number
+// of observations in the window, the current error rate, and the effective
+// sampling rate.
+type Stats struct {
+	WindowSize  int
+	ErrorRate   float64
+	EffectiveRate float64
+}
+
+// Snapshot returns a Stats snapshot of the sampler's current state.
+func (a *AdaptiveSampler) Snapshot() Stats {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	now := time.Now()
+	a.evict(now)
+	return Stats{
+		WindowSize:    len(a.window),
+		ErrorRate:     a.errorRate(now),
+		EffectiveRate: a.effectiveRate(now),
+	}
+}
+
 func (a *AdaptiveSampler) effectiveRate(now time.Time) float64 {
 	a.evict(now)
 	if a.errorRate(now) >= a.cfg.ErrorThreshold {

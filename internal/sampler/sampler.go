@@ -68,3 +68,17 @@ func (s *Sampler) Strategy() Strategy {
 func (s *Sampler) Rate() float64 {
 	return s.rate
 }
+
+// UpdateRate updates the sampling rate for a ProbabilisticSample strategy.
+// The rate is clamped to [0.0, 1.0]. This method is safe for concurrent use.
+func (s *Sampler) UpdateRate(rate float64) {
+	if rate < 0 {
+		rate = 0
+	}
+	if rate > 1 {
+		rate = 1
+	}
+	s.mu.Lock()
+	s.rate = rate
+	s.mu.Unlock()
+}

@@ -12,7 +12,7 @@ import (
 )
 
 // DefaultTimeout is used when no timeout is explicitly configured.
-const DefaultTimeout = 5 * time.Second
+con time.Second
 
 // Options holds configuration for the timeout interceptor.
 type Options struct {
@@ -50,7 +50,10 @@ func UnaryClientInterceptor(opts Options) grpc.UnaryClientInterceptor {
 		if err != nil {
 			// Translate DeadlineExceeded from context cancellation into a
 			// gRPC DeadlineExceeded status so callers get a consistent code.
-			if ctx.Err() == context.DeadlineExceeded {
+			// We also check the error itself in case the context deadline was
+			// exceeded before the invoker returned (e.g. in streaming setup).
+			if ctx.Err() == context.DeadlineExceeded ||
+				status.Code(err) == codes.DeadlineExceeded {
 				return status.Errorf(codes.DeadlineExceeded,
 					"rpc timed out after %s: %s", timeout, method)
 			}

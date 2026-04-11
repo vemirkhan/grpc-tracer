@@ -6,6 +6,11 @@
 // pass the criteria to [Match] for a single trace or [MatchAll] to scan an
 // entire store.
 //
+// Criteria fields are combined with AND semantics: a trace must satisfy all
+// non-zero fields to be considered a match. String fields such as ServiceName
+// and Method are matched case-insensitively as substring matches, so
+// ServiceName: "order" will match both "order-service" and "OrderProcessor".
+//
 // Example:
 //
 //	c := tracematcher.Criteria{

@@ -16,5 +16,9 @@
 //		store.AddSpan(traceID, span)
 //	}
 //
+// When MaxSpansPerSecond is set to 0, all spans are allowed through without
+// any rate limiting. When BurstSize is set to 0, it defaults to 1, ensuring
+// at least one span can always be admitted per refill interval.
+//
 // The Throttler is safe for concurrent use.
 package tracethrottler

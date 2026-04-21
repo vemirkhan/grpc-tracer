@@ -56,6 +56,15 @@ func Validate(s string) bool {
 	return err == nil
 }
 
+// Normalize returns the lowercase form of a valid hex-encoded ID.
+// It returns an error if the ID fails validation.
+func Normalize(s string) (string, error) {
+	if !Validate(s) {
+		return "", fmt.Errorf("traceid: invalid ID %q: must be a non-empty, even-length hex string", s)
+	}
+	return strings.ToLower(s), nil
+}
+
 // randomHex returns n random bytes encoded as a lowercase hex string.
 func randomHex(n int) (string, error) {
 	buf := make([]byte, n)

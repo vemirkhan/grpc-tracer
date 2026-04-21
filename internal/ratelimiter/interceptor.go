@@ -29,3 +29,24 @@ func UnaryServerInterceptor(limiter *Limiter) grpc.UnaryServerInterceptor {
 		return handler(ctx, req)
 	}
 }
+
+// StreamServerInterceptor returns a gRPC stream server interceptor that enforces
+// rate limiting using the provided Limiter. Stream requests that exceed the
+// allowed rate are rejected with codes.ResourceExhausted.
+func StreamServerInterceptor(limiter *Limiter) grpc.StreamServerInterceptor {
+	return func(
+		srv interface{},
+		ss grpc.ServerStream,
+		info *grpc.StreamServerInfo,
+		handler grpc.StreamHandler,
+	) error {
+		if !limiter.Allow() {
+			return status.Errorf(
+				codes.ResourceExhausted,
+				"rate limit exceeded for method %s",
+				info.FullMethod,
+			)
+		}
+		return handler(srv, ss)
+	}
+}
